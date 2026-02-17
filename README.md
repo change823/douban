@@ -5,3 +5,8 @@ Roast your style based on interests of a Douban user.
 
 
 ![](./roast-my-douban.png)
+
+
+---
+
+made with 99% AI, 1% Human

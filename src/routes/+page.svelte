@@ -70,11 +70,11 @@
       }
 
       // FILTER: Only items with tags or rating
-      itemsToScan = doubanData.interests.filter((i: any) => (i.tags && i.tags.length > 0) || i.rating);
+      itemsToScan = doubanData.interests.filter((i: any) => (i.tags && i.tags.length > 0) || i.rating || i.comment);
       totalItems = itemsToScan.length;
 
       if (totalItems === 0) {
-        throw new Error('未找到有效记录 (需包含评分或标签)');
+        throw new Error('未找到有效记录 (需包含评分、标签或评论)');
       }
 
       systemLogs = [...systemLogs, {id: logCounter++, text: `访问许可确认. 锁定 ${totalItems} 条有效记录.`}];

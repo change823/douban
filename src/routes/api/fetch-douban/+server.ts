@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const fetchData = async (start: number, count: number) => {
         // API: https://m.douban.com/rexxar/api/v2/user/{userId}/interests
         // Params from user report: type=book&status=done&start=0&count=20&ck=ruZ3&for_mobile=1
-        const url = `https://m.douban.com/rexxar/api/v2/user/${userId}/interests?type=${type}&status=done&count=${count}&start=${start}&ck=ruZ3&for_mobile=1`;
+      const url = `https://m.douban.com/rexxar/api/v2/user/${ userId }/interests?type=${ type }&status=done&count=${ count }&start=${ start }&for_mobile=1`;
         
         const headers = {
             'Referer': 'https://m.douban.com/mine/',
@@ -62,7 +62,12 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
             create_time: item.create_time,
             year: item.subject?.year,
             cover_url: item.subject?.pic?.large || item.subject?.cover_url || ''
-        })).filter(item => item.rating !== undefined && item.rating !== null);
+        })).filter(item => {
+          const hasRating = item.rating !== undefined && item.rating !== null;
+          const hasComment = typeof item.comment === 'string' && item.comment.length > 0;
+          const hasTags = Array.isArray(item.tags) && item.tags.length > 0;
+          return hasRating || hasComment || hasTags;
+        });
 
     const result = {
             count: items.length,
