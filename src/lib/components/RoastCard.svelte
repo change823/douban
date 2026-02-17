@@ -53,7 +53,7 @@
 
 </script>
 
-<div bind:this={cardElement} class="bg-white border-2 border-[#007722] shadow-[8px_8px_0px_0px_rgba(0,119,34,0.2)] p-8 w-full mx-auto text-slate-800 font-sans relative overflow-hidden group">
+<div bind:this={cardElement} class="bg-white border-2 border-[#007722] shadow-[8px_8px_0px_0px_rgba(0,119,34,0.2)] p-6 md:p-8 w-full mx-auto text-slate-800 font-sans relative overflow-hidden group">
 	
 	<div class="relative z-20">
 		<header class="border-b-2 border-[#007722]/20 pb-4 mb-8 flex justify-between items-end">
