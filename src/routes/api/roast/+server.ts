@@ -63,7 +63,7 @@ const ARCHETYPE_DEFINITIONS = `
 * **Tag：** #五星批发商 #世界和平 #毫无底线
 
 #### 11. 精神分裂的杂食怪 (The Schizophrenic Omnivore)
-* **触发条件：** 刚看完《小猪佩奇》紧接着看《索多玛120天》，左手《纯粹理性批判》右手《霸道总裁爱上我》。
+* **触发条件：** 同时包含极度冲突的元素（如：伯格曼+土味短剧，黑格尔+霸道总裁）。注意：仅仅是口味杂（如看日漫又看美剧）不算此类，必须是“审美隔离”级别的冲突。
 * **毒舌判词：** “你的大脑是个混沌的黑洞。前一秒还在思考宇宙终极真理，后一秒就在看土味短剧傻乐。你的品味跨度之大，让推荐算法直接死机。你不是博爱，你是真的疯。”
 * **Tag：** #算法克星 #大雅大俗 #脑回路清奇
 
@@ -94,10 +94,15 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
         
         ${ARCHETYPE_DEFINITIONS}
 
+        **IMPORTANT Archetype Selection Rules:**
+        - Do NOT default to "Schizophrenic Omnivore" just because the user has diverse tastes. Most people watch different things.
+        - "Schizophrenic Omnivore" is ONLY for EXTREME contrasts (High Art vs. Low Trash). 
+        - If they are just a normal person watching popular things + some anime, they are likely "Normie Mimic" or "Douban Know-It-All".
+
         Output a JSON object with:
         1. "archetype": A creative, slightly mean 4-word title (e.g. "文艺复兴守门员").
         2. "roast": A vicious, sharp, and humorous critique of their taste. **CRITICAL: The roast must be at least 200 Chinese characters long.** Do not be short. Deeply analyze their specific choices (high rating vs low rating). Mention specific titles if possible to roast them.
-        3. "tags": 3-4 short, punchy tags.
+        3. "tags": 3-4 short, punchy tags. **IMPORTANT:** Do not feel limited to the example tags in the definitions. You are ENCOURAGED to generate creative, specific tags based on the user's unique list (e.g. "#Nolan_Fanboy", "#Ghibli_Addict").
         4. "scores": specific scores (0-100) for the 5-axis psychological profile: "pretentiousness", "mainstream", "nostalgia", "darkness", "geekiness".
         5. "item_analysis": An array of objects, selecting the 30 most noteworthy items. **Prioritize items where the user wrote a comment or gave a conflicting rating.** 
         For each, provide a "thought" string (20-40 Chinese chars). 
@@ -138,16 +143,35 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
 		// Clean up markdown code blocks if present
 		let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-        // Extract JSON object if there's extra text
+    // Robust JSON extraction: Find first '{' and count braces to find matching '}'
         const firstOpen = cleanText.indexOf('{');
-        const lastClose = cleanText.lastIndexOf('}');
-        
-        if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-            cleanText = cleanText.substring(firstOpen, lastClose + 1);
+    let extractedJSON = null;
+
+    if (firstOpen !== -1) {
+      let balance = 0;
+      for (let i = firstOpen;i < cleanText.length;i++) {
+        if (cleanText[i] === '{') balance++;
+        else if (cleanText[i] === '}') balance--;
+
+        if (balance === 0) {
+          extractedJSON = cleanText.substring(firstOpen, i + 1);
+          break;
+        }
+      }
+    }
+
+    // Fallback: If structure is broken, try the old greedy method or just use the whole text if it looks like JSON
+    if (!extractedJSON) {
+      const lastClose = cleanText.lastIndexOf('}');
+      if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+            extractedJSON = cleanText.substring(firstOpen, lastClose + 1);
+          } else {
+            extractedJSON = cleanText;
+          }
         }
 
     return json({
-      ...JSON.parse(cleanText),
+      ...JSON.parse(extractedJSON),
       _model: llmResult.model // Optional: pass model name to frontend for debug/display
     });
 	} catch (e) {

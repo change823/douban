@@ -37,6 +37,10 @@
                 cacheBust: true,
                 pixelRatio: 2, // High resolution
                 backgroundColor: '#ffffff',
+                filter: (node) => {
+                    // Exclude elements with 'export-ignore' class
+                    return !node.classList?.contains('export-ignore');
+                }
             });
             
             const link = document.createElement('a');
@@ -100,6 +104,7 @@
                             text-anchor="middle"
                             dominant-baseline="middle"
                             class="text-[10px] fill-[#007722] font-bold"
+                            fill="#007722"
                          >{axes[i]}</text>
                     {/each}
 
@@ -129,7 +134,7 @@
         </div>
 
 		<!-- Roast Text -->
-		<div class="mb-8 relative px-2 -mx-4 md:mx-0">
+		<div class="relative px-2 -mx-4 md:mx-0">
 			<div class="absolute -left-1 -top-4 text-4xl text-[#007722] opacity-20 font-serif">"</div>
 			<p class="leading-relaxed text-slate-600 italic text-center font-serif text-sm md:text-base">
 				{result.roast}
@@ -137,7 +142,7 @@
 			<div class="absolute -right-1 -bottom-4 text-4xl text-[#007722] opacity-20 font-serif">"</div>
 		</div>
 
-		<footer class="flex items-center justify-center gap-4 pt-4" data-html2canvas-ignore="true">
+		<footer class="export-ignore flex items-center justify-center gap-4 pt-4 mt-8">
             <button 
                 onclick={() => window.location.reload()}
                 class="px-6 py-2 bg-[#007722]/10 hover:bg-[#007722]/20 text-[#007722] font-bold uppercase tracking-wider text-sm transition-colors rounded-sm"
