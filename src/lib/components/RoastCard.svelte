@@ -1,0 +1,161 @@
+<script lang="ts">
+    import { toPng } from 'html-to-image';
+
+	let { result } = $props();
+
+	// Radar Chart Logic
+	const axes = ['文艺', '大众', '猎奇', '情感', '二次元'];
+	const keys = ['artistic', 'mainstream', 'niche', 'emotional', 'acg'];
+	
+	const radius = 80;
+	const center = 100;
+	const angleStep = (Math.PI * 2) / 5;
+
+	function getPoint(index: number, value: number) {
+		const angle = -Math.PI / 2 + index * angleStep;
+		const r = (value / 100) * radius;
+		const x = center + r * Math.cos(angle);
+		const y = center + r * Math.sin(angle);
+		return `${x},${y}`;
+	}
+
+    // Determine polygon points
+	let points = $derived(keys.map((key, i) => {
+		const value = result.scores[key] || 0;
+		return getPoint(i, value);
+	}).join(' '));
+    
+    let cardElement: HTMLElement;
+    let isExporting = $state(false);
+
+    async function handleShare() {
+        if (!cardElement || isExporting) return;
+        isExporting = true;
+        
+        try {
+            const dataUrl = await toPng(cardElement, {
+                cacheBust: true,
+                pixelRatio: 2, // High resolution
+                backgroundColor: '#ffffff',
+            });
+            
+            const link = document.createElement('a');
+            link.download = `roast-my-douban-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            console.error("Export failed:", err);
+            alert("图片导出失败，请重试");
+        } finally {
+            isExporting = false;
+        }
+    }
+
+</script>
+
+<div bind:this={cardElement} class="bg-white border-2 border-[#007722] shadow-[8px_8px_0px_0px_rgba(0,119,34,0.2)] p-8 w-full mx-auto text-slate-800 font-sans relative overflow-hidden group">
+	
+	<div class="relative z-20">
+		<header class="border-b-2 border-[#007722]/20 pb-4 mb-8 flex justify-between items-end">
+			<div>
+				<h2 class="text-xs text-[#007722]/70 uppercase tracking-widest mb-1">诊断对象 ID</h2>
+				<h1 class="text-3xl font-bold font-sans text-[#007722] uppercase tracking-tighter">{result.archetype}</h1>
+			</div>
+			<div class="text-right">
+				<span class="text-xs text-[#007722]/50 block">确诊率</span>
+				<span class="text-xl font-bold text-[#007722]">99.9%</span>
+			</div>
+		</header>
+
+		<!-- Flex Container for Chart + Tags -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-24 mb-8">
+            <!-- Radar Chart -->
+            <div class="relative flex-shrink-0">
+                <svg width="180" height="180" viewBox="0 0 200 200" class="overflow-visible">
+                    <!-- Grid backgrounds (circles) -->
+                    {#each [20, 40, 60, 80, 100] as level}
+                        <polygon 
+                            points={keys.map((_, i) => getPoint(i, level)).join(' ')}
+                            fill="none" 
+                            stroke="#007722" 
+                            stroke-width="1"
+                            class="opacity-10"
+                        />
+                    {/each}
+                    
+                    <!-- Axes lines -->
+                    {#each keys as _, i}
+                        <line 
+                            x1={center} y1={center} 
+                            x2={getPoint(i, 100).split(',')[0]} 
+                            y2={getPoint(i, 100).split(',')[1]} 
+                            stroke="#007722" 
+                            stroke-width="1" 
+                            class="opacity-20"
+                        />
+                        <!-- Labels -->
+                         <text 
+                            x={parseFloat(getPoint(i, 115).split(',')[0])} 
+                            y={parseFloat(getPoint(i, 115).split(',')[1])}
+                            text-anchor="middle"
+                            dominant-baseline="middle"
+                            class="text-[10px] fill-[#007722] font-bold"
+                         >{axes[i]}</text>
+                    {/each}
+
+                    <!-- Data Polygon -->
+                    <polygon points={points} fill="rgba(0, 119, 34, 0.1)" stroke="#007722" stroke-width="2" />
+                    
+                    <!-- Data Points -->
+                     {#each keys as key, i}
+                        <circle 
+                            cx={getPoint(i, result.scores[key] || 0).split(',')[0]} 
+                            cy={getPoint(i, result.scores[key] || 0).split(',')[1]} 
+                            r="3" 
+                            fill="#007722"
+                        />
+                     {/each}
+                </svg>
+            </div>
+
+            <!-- Tags (Right on Desktop) -->
+            <div class="flex flex-wrap md:flex-col justify-center md:justify-center gap-3 max-w-[280px] md:max-w-[140px]">
+                {#each result.tags as tag}
+                    <span class="px-3 py-1.5 flex items-center justify-center bg-[#007722]/5 border border-[#007722]/30 text-xs text-[#007722] rounded-full uppercase tracking-wider font-bold whitespace-nowrap">
+                        {tag}
+                    </span>
+                {/each}
+            </div>
+        </div>
+
+		<!-- Roast Text -->
+		<div class="mb-8 relative px-2 -mx-4 md:mx-0">
+			<div class="absolute -left-1 -top-4 text-4xl text-[#007722] opacity-20 font-serif">"</div>
+			<p class="leading-relaxed text-slate-600 italic text-center font-serif text-sm md:text-base">
+				{result.roast}
+			</p>
+			<div class="absolute -right-1 -bottom-4 text-4xl text-[#007722] opacity-20 font-serif">"</div>
+		</div>
+
+		<footer class="flex items-center justify-center gap-4 pt-4" data-html2canvas-ignore="true">
+            <button 
+                onclick={() => window.location.reload()}
+                class="px-6 py-2 bg-[#007722]/10 hover:bg-[#007722]/20 text-[#007722] font-bold uppercase tracking-wider text-sm transition-colors rounded-sm"
+            >
+                 
+            <svg class="inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            回到主页
+            </button>
+            
+            <button 
+                onclick={handleShare}
+                disabled={isExporting}
+                class="px-6 py-2 bg-[#007722] hover:bg-[#006611] text-white font-bold uppercase tracking-wider text-sm transition-colors shadow-lg active:translate-y-1 active:shadow-none rounded-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait"
+            >
+                {isExporting ? '生成中...' : '分享诊断单'}
+            </button>
+		</footer>
+	</div>
+</div>
