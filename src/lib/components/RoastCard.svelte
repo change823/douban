@@ -16,7 +16,7 @@
   let diagnosisRate = $derived(getDiagnosisRate(result.roast || ''));
 
   // Radar Chart Logic
-  const axes = ['文艺', '现充', '遗老', '阴暗', '死宅'];
+  const axes = ['文艺', '现充', '遗老', '致郁', '死宅'];
   const keys = ['pretentiousness', 'mainstream', 'nostalgia', 'darkness', 'geekiness'];
 
   const radius = 80;

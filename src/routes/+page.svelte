@@ -284,7 +284,7 @@
             <h1 class="text-3xl md:text-5xl font-extrabold text-[#007722] tracking-tight mb-2 flex items-center justify-center gap-3 md:gap-4">
               <span>ROAST MY DOUBAN</span>
             </h1>
-            <p class="text-[#007722] text-sm tracking-[0.2em] font-bold">豆瓣年度精神状态分析</p>
+            <p class="text-[#007722] text-sm tracking-[0.2em] font-bold">豆瓣标记精神状态分析</p>
           </div>
 
           <form
@@ -372,7 +372,7 @@
             <h1 class="text-3xl md:text-5xl font-extrabold text-[#007722] tracking-tight mb-2 flex items-center justify-center gap-3 md:gap-4">
               <span>ROAST MY DOUBAN</span>
             </h1>
-            <p class="text-[#007722] text-sm tracking-[0.2em] font-bold">豆瓣年度精神状态分析</p>
+            <p class="text-[#007722] text-sm tracking-[0.2em] font-bold">豆瓣标记精神状态分析</p>
           </div>
 
           <div

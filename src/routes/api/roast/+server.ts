@@ -125,7 +125,7 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
                 "pretentiousness": 0-100, // 文艺值: Art-house, philosophy, difficulty to understand
                 "mainstream": 0-100, // 现充值: Blockbusters, popular music
                 "nostalgia": 0-100, // 遗老值: Old content (pre-2000s)
-                "darkness": 0-100, // 阴暗值: Horror, crime, tragedy
+                "darkness": 0-100, // 致郁值: Horror, crime, tragedy
                 "geekiness": 0-100 // 死宅值: Sci-fi, anime, fantasy
             },
             "item_analysis": [
