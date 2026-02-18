@@ -82,9 +82,10 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
     throw error(400, 'Invalid data');
   }
 
+  // Revert back to JSON format as requested by user
   const interestes_ = interests.map((item: any) => ({
     title: item.title,
-    rating: item.rating?.value,
+    rating: item.rating,
     tags: item.tags,
     comment: item.comment,
     create_time: item.create_time,
@@ -134,9 +135,10 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
             "scores": {
                 "pretentiousness": 0-100, // 文艺值: Art-house, philosophy, difficulty to understand
                 "mainstream": 0-100, // 现充值: Blockbusters, popular music
-                "nostalgia": 0-100, // 遗老值: Old content (pre-2000s)
+                "nostalgia": 0-100, // 怀旧值: Old content (pre-2000s)
                 "darkness": 0-100, // 致郁值: Horror, crime, tragedy
-                "geekiness": 0-100 // 死宅值: Sci-fi, anime, fantasy
+                "geekiness": 0-100, // 死宅值: Sci-fi, anime, fantasy
+                "hardcore": 0-100 // 硬核值: Non-fiction, history, science, business
             },
             "item_analysis": [
                 { "title": "Exact Title 1", "thought": "Spicy remark here" },

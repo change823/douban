@@ -115,7 +115,16 @@
 
       const roastRes = await fetch('/api/roast', {
         method: 'POST',
-        body: JSON.stringify({interests: itemsToScan}), // Send filtered list or full? Context is better with full, but roast relies on noteworthy items. Let's send full for context.
+        body: JSON.stringify({
+          interests: itemsToScan.map((i: any) => ({
+            title: i.title,
+            rating: i.rating,
+            tags: i.tags,
+            comment: i.comment,
+            create_time: i.create_time,
+            year: i.year
+          }))
+        }),
         headers: {'Content-Type': 'application/json'},
       });
 
@@ -322,6 +331,7 @@
                 id="uid"
                 type="text"
                 bind:value={userId}
+                autocomplete="off"
                 placeholder="例如: 1000001 或 ahbei"
                 class="w-full bg-[#f9f9f9] border border-gray-100 rounded-lg p-3 focus:outline-none focus:border-[#42bd56] focus:ring-2 focus:ring-[#42bd56]/20 transition-all font-mono placeholder:text-gray-300 text-[#494949] text-sm"
               />
