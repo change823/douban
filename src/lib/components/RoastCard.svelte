@@ -97,6 +97,7 @@
   async function handleShare() {
     if (!cardElement || isExporting) return;
     isExporting = true;
+    const fileName = `roast-my-douban-${Date.now()}.png`;
 
     try {
       const dataUrl = await toPng(cardElement, {
@@ -105,13 +106,37 @@
         backgroundColor: '#ffffff',
       });
 
+      // Try Web Share API first (for iOS/Android native share sheet)
+      // Only use Web Share on mobile devices to ensure desktop users get a file download
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile && typeof navigator !== 'undefined' && navigator.canShare) {
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], fileName, {type: 'image/png'});
+          const shareData = {
+            files: [file],
+            title: 'Roast My Douban',
+            text: '看看我的豆瓣标记成分诊断结果！ #RoastMyDouban',
+          };
+
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            return; // Share successful, exit
+          }
+        } catch (shareError) {
+          console.warn('Web Share API failed, falling back to download:', shareError);
+          // Continue to fallback
+        }
+      }
+
+      // Fallback: Download Link (Desktop/Unsupported browsers)
       const link = document.createElement('a');
-      link.download = `roast-my-douban-${Date.now()}.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error('Export failed:', err);
-      alert('图片导出失败，请重试');
+      // alert('图片导出失败，请重试'); // Alert is annoying if user just cancelled share
     } finally {
       isExporting = false;
     }
@@ -201,16 +226,21 @@
               />
             {/each}
           </svg>
-          
+
           <!-- Tooltip (Absolute Positioned relative to svg container) -->
           {#if hoveredAxisIndex !== null && !isExporting}
             <div
-              class="absolute bg-white/95 backdrop-blur-sm border border-[#007722]/20 shadow-xl rounded-lg p-4 w-68 z-[100] text-xs pointer-events-none animate-in fade-in zoom-in-95 duration-200 transform {getTooltipClass(hoveredAxisIndex)}"
+              class="absolute bg-white/95 backdrop-blur-sm border border-[#007722]/20 shadow-xl rounded-lg p-4 w-68 z-[100] text-xs pointer-events-none animate-in fade-in zoom-in-95 duration-200 transform {getTooltipClass(
+                hoveredAxisIndex,
+              )}"
               style={getTooltipStyle(hoveredAxisIndex)}
             >
               <h3 class="font-bold text-[#007722] mb-2">{axisDefinitions[hoveredAxisIndex].title}</h3>
               <div class="space-y-2 text-slate-600">
-                <p><span class="font-bold text-[#007722]/70">含义:</span> {axisDefinitions[hoveredAxisIndex].meaning}</p>
+                <p>
+                  <span class="font-bold text-[#007722]/70">含义:</span>
+                  {axisDefinitions[hoveredAxisIndex].meaning}
+                </p>
                 <p><span class="font-bold text-[#007722]/70">高分:</span> {axisDefinitions[hoveredAxisIndex].high}</p>
                 <p><span class="font-bold text-[#007722]/70">低分:</span> {axisDefinitions[hoveredAxisIndex].low}</p>
               </div>
@@ -230,7 +260,6 @@
         </div>
       </div>
 
-
       <!-- Roast Text -->
       <div class="relative px-2 -mx-3 md:mx-0">
         <div class="absolute -left-1 -top-4 text-4xl text-[#007722] opacity-20 font-serif">"</div>
@@ -242,7 +271,7 @@
     </div>
   </div>
 
-  <footer class="flex items-center justify-center gap-4 py-4 mt-4 ">
+  <footer class="flex items-center justify-center gap-4 py-4 mt-4">
     <button
       onclick={() => window.location.reload()}
       class="px-6 py-2 bg-[#007722]/10 hover:bg-[#007722]/20 text-[#007722] font-bold uppercase tracking-wider text-sm transition-colors rounded-sm"
