@@ -44,6 +44,8 @@ async function callQwen(prompt: string): Promise<LLMResponse> {
   // Qwen via Alibaba DashScope (OpenAI Compatible)
   if (!env.DASHSCOPE_API_KEY) throw new Error("Missing DASHSCOPE_API_KEY");
 
+  const model = env.DASHSCOPE_MODEL_ID || 'qwen-plus';
+
   const response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -51,14 +53,14 @@ async function callQwen(prompt: string): Promise<LLMResponse> {
       'Authorization': `Bearer ${ env.DASHSCOPE_API_KEY }`
     },
     body: JSON.stringify({
-      model: 'qwen3.5-plus',
+      model: model,
       messages: [{ role: 'user', content: prompt }]
     })
   });
 
   if (!response.ok) throw new Error(`Qwen API Error: ${ response.status }`);
   const data = await response.json();
-  return { text: data.choices[0].message.content, model: 'Qwen Plus' };
+  return { text: data.choices[0].message.content, model: `Qwen (${ model })` };
 }
 
 async function callDoubao(prompt: string): Promise<LLMResponse> {
