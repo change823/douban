@@ -285,8 +285,11 @@
         <div
           class="w-full max-w-[280px] md:max-w-[320px] shrink-0 transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500 ease-out z-10"
         >
-          <div
-            class="relative rounded-lg shadow-sm border-[6px] border-white overflow-hidden aspect-[9/14] bg-slate-100 group"
+          <a
+            href="https://www.douban.com/people/14188082/status/2532037238/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="relative block rounded-lg shadow-sm border-[6px] border-white overflow-hidden aspect-[9/14] bg-slate-100 group"
           >
             <!-- Placeholder color while loading or if missing -->
             <div
@@ -305,17 +308,15 @@
             <div
               class="absolute inset-0 bg-white/40 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 group-hover:backdrop-blur-sm transition-opacity duration-300 text-center"
             >
-              <p class="text-[#007722]/70 bg-white/70 p-3 text-sm leading-relaxed">
+              <p class="text-[#007722]/70 bg-white/70 p-3 text-sm leading-relaxed pointer-events-none">
                 谢谢做这张图的豆瓣用户
-                <a class="decoration-dotted underline-offset-2 underline" href="https://www.douban.com/people/14188082/status/2532037238/"
-                  >@mui</a
-                >
+                <span class="font-bold underline decoration-dotted underline-offset-2">@mui</span>
                 <br />
 
                 如有侵权，请联系我删除。
               </p>
             </div>
-          </div>
+          </a>
         </div>
 
         <!-- Right Column: Login Form -->
@@ -331,9 +332,9 @@
 
           <form
             onsubmit={handleSubmit}
-            class="w-full space-y-6 bg-white p-8 rounded-xl shadow-[0_20px_50px_-12px_rgba(0,119,34,0.15)] border border-[#007722]/10 relative overflow-hidden backdrop-blur-sm"
+            class="w-full space-y-6 bg-white p-8 rounded-xl shadow-[0_20px_50px_-12px_rgba(0,119,34,0.15)] border border-[#007722]/10 relative backdrop-blur-sm"
           >
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#007722]/70 to-[#42bd56]"></div>
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#007722]/70 to-[#42bd56] rounded-t-xl"></div>
 
             <div class="space-y-2">
               <label
@@ -341,6 +342,29 @@
                 class="text-xs font-bold text-[#007722]/70 tracking-wide ml-1 flex items-center gap-1"
               >
                 豆瓣 ID
+                <div class="relative group cursor-help inline-flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-[#007722]/50 hover:text-[#007722] transition-colors"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  <div
+                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 p-2 bg-white bg-opacity-80 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center shadow-lg"
+                  >就是你豆瓣链接后面那一坨数字！！！ 不是你的网名！！！
+            
+                  </div>
+                </div>
               </label>
               <input
                 id="uid"
