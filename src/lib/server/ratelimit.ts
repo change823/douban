@@ -69,6 +69,18 @@ export function withRateLimit(
   handler: (event: RequestEvent) => Promise<Response>
 ) {
   return async (event: RequestEvent) => {
+    // Check if user provided API keys to bypass rate limit
+    try {
+      const cloned = event.request.clone();
+      const body = await cloned.json();
+      if (body?.apiKeys && (body.apiKeys.google || body.apiKeys.deepseek || body.apiKeys.qwen)) {
+        // Bypass rate limit for supporters
+        return handler(event);
+      }
+    } catch (e) {
+      // ignore json parse error, proceed to rate limit
+    }
+
     const limitRes = await checkRateLimit(
       event.request,
       LIMIT_CONFIG.MAX_REQUESTS_PER_DAY,

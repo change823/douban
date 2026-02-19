@@ -1,7 +1,7 @@
 <script lang="ts">
   import RoastCard from '$lib/components/RoastCard.svelte';
   import TypewriterText from '$lib/components/TypewriterText.svelte';
-  import {fade, fly, scale} from 'svelte/transition';
+  import {fade, fly, scale, slide} from 'svelte/transition';
 
   let userId = $state('');
   let type = $state('book');
@@ -34,6 +34,32 @@
   // Ingestion state
   let ingestionInterval: any;
   let itemsToScan: any[] = []; // Filtered list
+
+  // Custom API Keys
+  let showApiKeys = $state(false);
+  let apiKeys = $state({
+    google: '',
+    deepseek: '',
+    qwen: ''
+  });
+
+  $effect(() => {
+    const saved = localStorage.getItem('douban_roast_api_keys');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        apiKeys = { ...apiKeys, ...parsed };
+      } catch (e) {
+        console.error('Failed to parse saved API keys', e);
+      }
+    }
+  });
+
+  $effect(() => {
+    if (apiKeys.google || apiKeys.deepseek || apiKeys.qwen) {
+      localStorage.setItem('douban_roast_api_keys', JSON.stringify(apiKeys));
+    }
+  });
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
@@ -126,6 +152,11 @@
             create_time: i.create_time,
             year: i.year,
           })),
+          apiKeys: {
+            google: apiKeys.google || undefined,
+            deepseek: apiKeys.deepseek || undefined,
+            qwen: apiKeys.qwen || undefined
+          }
         }),
         headers: {'Content-Type': 'application/json'},
       });
@@ -403,6 +434,69 @@
               </div>
             {/if}
 
+            <!-- API Key Configuration (Collapsible) -->
+            <div class="border-t border-dashed border-gray-200 pt-4">
+              <button
+                type="button"
+                class="flex items-center gap-2 text-xs font-bold text-[#007722]/50 hover:text-[#007722] transition-colors w-full"
+                onclick={() => (showApiKeys = !showApiKeys)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200 {showApiKeys ? 'rotate-90' : ''}"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+                <span>设置 API Key</span>
+              </button>
+
+              {#if showApiKeys}
+                <div transition:slide={{ duration: 200 }} class="mt-3 space-y-3">
+                  <div class="p-3 bg-yellow-50 text-yellow-800 text-[11px] rounded leading-relaxed border border-yellow-100">
+                    <span class="font-bold text-sm block mb-1">💸 开发者哭穷</span>
+                    大模型烧钱如流水，开发者马上要灯枯油尽了。
+                   <br />
+                    
+                    如若遇到请求长时间不返回的情况，请在此处填入您自己的 API KEY。
+                   <br />
+                    您的 Key 仅保留在本地浏览器，通过安全连接直接请求
+                  </div>
+                  
+                  <div class="space-y-2">
+                    <input
+                      type="password"
+                      autocomplete="off"
+                      bind:value={apiKeys.deepseek}
+                      placeholder="DeepSeek API Key (sk-...)"
+                      class="w-full bg-gray-50 border border-gray-100 rounded p-2 text-xs focus:outline-none focus:border-[#42bd56] transition-colors font-mono placeholder:text-gray-300"
+                    />
+                    <input
+                      type="password"
+                      autocomplete="off"
+                      bind:value={apiKeys.google}
+                      placeholder="Google Gemini API Key (AIza...)"
+                      class="w-full bg-gray-50 border border-gray-100 rounded p-2 text-xs focus:outline-none focus:border-[#42bd56] transition-colors font-mono placeholder:text-gray-300"
+                    />
+                     <input
+                      type="password"
+                      autocomplete="off"
+                      bind:value={apiKeys.qwen}
+                      placeholder="Qwen API Key (sk-...)"
+                      class="w-full bg-gray-50 border border-gray-100 rounded p-2 text-xs focus:outline-none focus:border-[#42bd56] transition-colors font-mono placeholder:text-gray-300"
+                    />
+                  </div>
+                </div>
+              {/if}
+            </div>
+
             <button
               type="submit"
               class="w-full py-4 bg-[#42bd56] hover:bg-[#42bd56] cursor-pointer text-white font-bold tracking-widest text-sm transition-all rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
@@ -531,7 +625,7 @@
   </div>
 
   <div class="absolute bottom-4 left-0 w-full text-center select-none ">
-    <p class="text-[10px] text-[#007722]/50 font-mono mx-6">
+    <p class="text-[11px] text-[#007722]/50 font-mono mx-6">
       Designed by <a target="_blank" rel="noopener noreferrer" href="https://github.com/anig1scur">Yanxin</a> and made with Gemini.
       内容由 AI 生成，仅供娱乐，请勿自行代入或过度解读
     </p>
