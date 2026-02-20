@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { cache } from '$lib/server/cache';
+
 
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
 	const { userId, type } = await request.json();
@@ -9,15 +9,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 		throw error(400, '缺少必要参数');
 	}
 
-  const cacheKey = `@rmd/cache:douban:${ userId }:${ type }`;
-  const cachedData = await cache.get(cacheKey);
 
-  if (cachedData) {
-    console.log(`[Cache] Hit for ${ cacheKey }`);
-    return json(cachedData);
-  }
-
-  console.log(`[Cache] Miss for ${ cacheKey }, fetching from Douban...`);
 
     // Helper to fetch data from Rexxar API
     const fetchData = async (start: number, count: number) => {
@@ -85,12 +77,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
             interests: items
     };
 
-    // Save to cache only if count >= 30
-    if (result.count >= 30) {
-      await cache.set(cacheKey, result);
-    } else {
-      console.log(`[Cache] Skipped caching for ${ cacheKey } (count: ${ result.count } < 30)`);
-    }
+
 
     return json(result);
 

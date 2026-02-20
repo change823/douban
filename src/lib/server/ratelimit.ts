@@ -31,7 +31,8 @@ export async function checkRateLimit(
     const ratelimit = new Ratelimit({
       redis: redis,
       limiter: Ratelimit.fixedWindow(limitCount, '24 h'),
-      analytics: true,
+      analytics: false,
+      ephemeralCache: new Map(),
       prefix: prefix,
     });
 
