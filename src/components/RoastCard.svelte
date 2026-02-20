@@ -328,7 +328,7 @@
                     <div class="flex items-baseline justify-between gap-2 mb-2">
                       <div class="font-bold text-[#007722]/80 shrink-0">《{item.title}》</div>
                       {#if item.user_comment}
-                        <div class="text-[10px] text-gray-500 line-clamp-2 leading-tight text-right italic font-serif opacity-80">
+                        <div class="text-[10px] text-[#007722]/80 line-clamp-2 leading-tight text-right italic font-serif opacity-80">
                           {item.user_comment}
                         </div>
                       {/if}

@@ -42,10 +42,7 @@
   });
 
   $effect(() => {
-    // Only save if keys are present (basic debounce logic via Svelte batching)
-    if (apiKeys.google || apiKeys.deepseek || apiKeys.qwen) {
-      localStorage.setItem('douban_roast_api_keys', JSON.stringify(apiKeys));
-    }
+    localStorage.setItem('douban_roast_api_keys', JSON.stringify(apiKeys));
   });
 
   async function handleSubmit(e: Event) {
