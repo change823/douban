@@ -2,6 +2,7 @@ export class Roaster {
   // Config
   userId = $state('');
   type = $state('book');
+  mode = $state<'roast' | 'compliment'>('roast');
 
   // State
   status = $state<'idle' | 'scanning' | 'analyzing' | 'success' | 'error'>('idle');
@@ -105,7 +106,8 @@ export class Roaster {
       this.startIngestionVisualization(doubanData.interests);
 
       // Call API
-      const roastRes = await fetch('/api/roast', {
+      const endpoint = this.mode === 'compliment' ? '/api/compliment' : '/api/roast';
+      const roastRes = await fetch(endpoint, {
         method: 'POST',
         body: JSON.stringify({
           interests: itemsToScan.map((i: any) => ({

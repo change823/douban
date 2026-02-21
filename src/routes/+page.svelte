@@ -25,7 +25,7 @@
     google: '',
     deepseek: '',
     qwen: '',
-    openai: '',
+    chatgpt: '',
   });
 
   onMount(() => {
@@ -190,6 +190,30 @@
             </div>
 
             <div class="space-y-4">
+              <div class="text-sm font-bold text-[#007722]/70 tracking-wide mb-2">侧写模式</div>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  class="p-3 border rounded-lg text-xs font-bold transition-all {roaster.mode === 'roast'
+                    ? 'bg-[#42bd56] border-[#42bd56] text-white  shadow-sm'
+                    : 'border-gray-100 bg-[#f9f9f9] text-gray-400 hover:text-[#007722] hover:bg-[#007722]/5 scale-95'}"
+                  onclick={() => (roaster.mode = 'roast')}
+                >
+                  毒舌版
+                </button>
+                <button
+                  type="button"
+                  class="p-3 border rounded-lg text-xs font-bold transition-all {roaster.mode === 'compliment'
+                    ? 'bg-gradient-to-r from-red-500 to-yellow-500 border-red-500 text-white shadow-md'
+                    : 'border-gray-100 bg-[#f9f9f9] text-gray-400 hover:text-red-500 hover:bg-red-500/5 scale-95'}"
+                  onclick={() => (roaster.mode = 'compliment')}
+                >
+                  夸夸版
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-4">
               <div class="text-sm font-bold text-[#007722]/70 tracking-wide mb-2">分析类别</div>
               <div class="grid grid-cols-3 gap-3">
                 {#each [{val: 'book', label: '书籍', active: 'bg-[#42bd56] border-[#42bd56]', hover: 'hover:text-[#42bd56] hover:bg-[#42bd56]/5'}, {val: 'movie', label: '电影', active: 'bg-[#2389eb] border-[#2377cb]', hover: 'hover:text-[#2377cb] hover:bg-[#2377cb]/5'}, {val: 'music', label: '音乐', active: 'bg-[#ff9600] border-[#ff9600]', hover: 'hover:text-[#ff9600] hover:bg-[#ff9600]/5'}] as t}
@@ -249,7 +273,7 @@
                   >
                     如若遇到请求长时间不返回的情况，可在下方填入您自己的 API Key，可能输出更丰富的结果哦。 您的 Key
                     仅保留在本地浏览器，通过安全连接直接请求。
-                    <div class="h-1 " />
+                    <div class="h-1"></div>
                     或者给
                     <a
                       href="https://github.com/roast-my/douban?tab=readme-ov-file#support-me"
@@ -459,7 +483,7 @@
       </div>
     {:else if roaster.status === 'success' && roaster.result}
       <div class="w-full max-w-3xl col-start-1 row-start-1 animate-in zoom-in-95 duration-500">
-        <RoastCard result={roaster.result} />
+        <RoastCard result={roaster.result} mode={roaster.mode} />
       </div>
     {/if}
   </div>

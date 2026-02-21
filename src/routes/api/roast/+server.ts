@@ -2,7 +2,6 @@ import { json, error } from '@sveltejs/kit';
 import { jsonrepair } from 'jsonrepair';
 import { generateRoast } from '$lib/server/llm';
 import { withRateLimit } from '$lib/server/ratelimit';
-import type { RequestHandler } from './$types';
 
 const ARCHETYPE_DEFINITIONS_SHORT = `
 1. Renaissance Gatekeeper (文艺复兴守门员): Pre-1990s snob. Black & white films. Hates modern pop. Tag: #TimeTraveler #OldSchool
@@ -93,7 +92,7 @@ const ARCHETYPE_DEFINITIONS_LONG = `
 ### 第六组：怪诞与脑洞 (The Weirdos & Visionaries)
 
 #### 13. 快乐怪胎 (The Happy Weirdo)
-* **触发条件：** 影：《约翰·威尔逊的十万个怎么做》、**定格动画**。漫：《瑞克和莫蒂》、《探险活宝》、《JOJO的奇妙冒险》。书：《银河系漫游指南》、各种无厘头漫画。 评分通常很高，关键词里常出现“哈哈哈哈”、“神经病”、“卧槽”、“好怪再看一眼”。
+* **触发条件：** 影:《约翰·威尔逊的十万个怎么做》、定格动画。漫:《瑞克和莫蒂》、《探险活宝》、《JOJO的奇妙冒险》。书:《银河系漫游指南》、各种无厘头漫画。 评分通常很高，关键词里常出现“哈哈哈哈”、“神经病”、“卧槽”、“好怪再看一眼”。
 * **毒舌判词：** “你的大脑是不是漏电了？你的片单就像是一个打翻了的调色盘，充满了多巴胺过载的痕迹。你拒绝任何严肃和沉闷的东西，只对‘发疯’和‘脑洞’情有独钟。在旁人眼里你是精神病人，在你眼里旁人都是无聊的 NPC。建议少吃菌子，多喝热水。”
 * **Tag：** #精神状态美丽 #脑洞漏风 #好怪再看一眼 #人类迷惑行为
 `;
@@ -111,8 +110,8 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
   let prompt = '';
 
   if (useRichPrompt) {
-     // Rich Mode: Use full data and long archetypes
-     const interestes_ = interests.map((item: any) => ({
+    // Rich Mode: Use full data and long archetypes
+    const interestes_ = interests.map((item: any) => ({
       title: item.title,
       rating: item.rating,
       tags: item.tags,
@@ -128,55 +127,53 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
 
     Analyze the following list of user records (movies/books/music) from Douban.
     
-        Analyze this user's taste based on their Douban interests history:
-        ${JSON.stringify(interestes_)}
-        
-        **SAFE ROASTING POLICY (DO NOT VIOLATE):**
-        - **RESPECT IDENTITY & JUSTICE:** Never roast the user's stance on gender equality, feminism, LGBTQ+ rights, race, or human rights. 
-        - **NO MISOGYNY/DISCRIMINATION:** Do not use gendered insults or patronizing tones. If the user likes feminist content/high-scorers, do NOT roast or mock the movement or values.
-        - **ROAST TASTE, NOT VALUES:** Focus your "poisonous tongue" on their pop culture consumption habits, intellectual vanity, over-hyped trends, and contradictions in entertainment taste.
-        
-        Based on the definitions below, identify the user's specific archetype:
-        ${ARCHETYPE_DEFINITIONS_LONG}
+    Analyze this user's taste based on their Douban interests history:
+    ${JSON.stringify(interestes_) }
+    
+    **SAFE ROASTING POLICY (DO NOT VIOLATE):**
+    - **RESPECT IDENTITY & JUSTICE:** Never roast the user's stance on gender equality, feminism, LGBTQ+ rights, race, or human rights. 
+    - **NO MISOGYNY/DISCRIMINATION:** Do not use gendered insults or patronizing tones. If the user likes feminist content/high-scorers, do NOT roast or mock the movement or values.
+    - **ROAST TASTE, NOT VALUES:** Focus your "poisonous tongue" on their pop culture consumption habits, intellectual vanity, over-hyped trends, and contradictions in entertainment taste.
+    
+    Based on the definitions below, identify the user's specific archetype:
+    ${ ARCHETYPE_DEFINITIONS_LONG}
 
-        **IMPORTANT Archetype Selection Rules:**
-        - **CREATIVE MODE ENABLED:** If the user's taste is distinct and funny but doesn't fit the above 13 archetypes perfectly, **YOU MUST INVENT A NEW ONE**.
-        - The new archetype name must be 4-10 Chinese characters, witty, mean, and specific (e.g. "烂片考古学家", "纯爱战神", "午夜emo冠军").
-        - **Creativity is preferred.** Don't just pick the safe option.
+    **IMPORTANT Archetype Selection Rules:**
+    - **CREATIVE MODE ENABLED:** If the user's taste is distinct and funny but doesn't fit the above 13 archetypes perfectly, **YOU MUST INVENT A NEW ONE**.
+    - The new archetype name must be 4-10 Chinese characters, witty, mean, and specific (e.g. "烂片考古学家", "纯爱战神", "午夜emo冠军").
+    - **Creativity is preferred.** Don't just pick the safe option.
 
-        Output a JSON object with:
-        1. "archetype": A creative, slightly mean 4-word title (e.g. "文艺复兴守门员").
-        2. "roast": A vicious, sharp, and humorous critique of their taste. **Do not be short.** Deeply analyze their specific choices (high rating vs low rating). Mention specific titles if possible to roast them.
-        3. "tags": 3-5 short, punchy tags. **IMPORTANT:** Do not feel limited to the example tags in the definitions. You are ENCOURAGED to generate creative, specific tags based on the user's unique list (e.g. "#Nolan_Fanboy", "#Ghibli_Addict").
-        4. "scores": specific scores (0-100) for the 6-axis psychological profile: "pretentiousness", "mainstream", "nostalgia", "darkness", "geekiness", "hardcore".
-        5. "item_analysis": An array of objects, selecting the 50 most noteworthy items. **Prioritize items where the user wrote a comment or gave a conflicting rating.** 
-        For each, provide a "thought" string (20-40 Chinese chars). 
-        
-        **CRITICAL STYLE FOR THOUGHTS:**
-        - **Format**: Pure text.
-        - **Tone**: "Spicy & Insightful & Smart" (毒舌且一针见血，且有深度)
-        - **Content**: Don't just say "Good movie". Say *why* this specific user watched it or rated it that way. Use the timestamp/rating/tags!
+    Output a JSON object with:
+    1. "archetype": A creative, slightly mean 4-word title (e.g. "文艺复兴守门员").
+    2. "roast": A vicious, sharp, and humorous critique of their taste. **Do not be short.** Deeply analyze their specific choices (high rating vs low rating). Mention specific titles if possible to roast them.
+    3. "tags": 3-5 short, punchy tags. **IMPORTANT:** Do not feel limited to the example tags in the definitions. You are ENCOURAGED to generate creative, specific tags based on the user's unique list (e.g. "#Nolan_Fanboy", "#Ghibli_Addict").
+    4. "scores": specific scores (0-100) for the 6-axis psychological profile: "pretentiousness", "mainstream", "nostalgia", "darkness", "geekiness", "hardcore".
+    5. "item_analysis": An array of objects, selecting the 50 most noteworthy items. **Prioritize items where the user wrote a comment or gave a conflicting rating.** 
+    For each, provide a "thought" string (20-40 Chinese chars). 
+    
+    **CRITICAL STYLE FOR THOUGHTS:**
+    - **Format**: Pure text.
+    - **Tone**: "Spicy & Insightful & Smart" (毒舌且一针见血，且有深度)
+    - **Content**: Don't just say "Good movie". Say *why* this specific user watched it or rated it that way. Use the timestamp/rating/tags!
 
-        The JSON should follow this structure:
-        {
-            "archetype": "Name of the archetype (4-10 chars)",
-            "roast": "A 1000+ char ruthless roast about their taste contradictions...",
-            "tags": ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5"],
-            "scores": {
-                "pretentiousness": 0-100, 
-                "mainstream": 0-100,
-                "nostalgia": 0-100, 
-                "darkness": 0-100, 
-                "geekiness": 0-100, 
-                "hardcore": 0-100 
-            },
-            "item_analysis": [
-            ["Title", "Thought"], ["Title", "Thought"]
-            
-            ]
-        }
+    The JSON should follow this structure:
+    {
+        "archetype": "Name of the archetype (4-10 chars)",
+        "roast": "A 1000+ char ruthless roast about their taste contradictions...",
+        "tags": ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5"],
+        "scores": {
+            "pretentiousness": 0-100, 
+            "mainstream": 0-100,
+            "nostalgia": 0-100, 
+            "darkness": 0-100, 
+            "geekiness": 0-100, 
+            "hardcore": 0-100 
+        },
+        "item_analysis": [
+        ["Title", "Thought"], ["Title", "Thought"]
+        ]
+    }
     `;
-
   } else {
     // Optimized Mode: Use minimal data and short archetypes
     const interestes_ = interests.map((item: any) => ({
@@ -217,7 +214,7 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
       "scores": { "pretentiousness": 0-100, "mainstream": 0-100, "nostalgia": 0-100, "darkness": 0-100, "geekiness": 0-100, "hardcore": 0-100 },
       "item_analysis": [["Title", "Thought"], ["Title", "Thought"]]
     }
-  `;
+    `;
   }
 
   try {
@@ -228,7 +225,7 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
     // Clean up markdown code blocks if present
     let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-    // Robust JSON extraction: Find first '{' and count braces to find matching '}'
+    // Robust JSON extraction
     const firstOpen = cleanText.indexOf('{');
     let extractedJSON = null;
 
@@ -245,7 +242,6 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
       }
     }
 
-    // Fallback: If structure is broken, try the old greedy method or just use the whole text if it looks like JSON
     if (!extractedJSON) {
       const lastClose = cleanText.lastIndexOf('}');
       if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
@@ -272,7 +268,7 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
     });
   } catch (e: any) {
     console.error('Roast Generation Error:', e);
-    const message = e instanceof Error ? e.message : 'Unknown error occurred during generation';
+    const message = e instanceof Error ? e.message : 'Unknown error';
     throw error(500, `Failed to generate roast: ${ message }`);
   }
 });
