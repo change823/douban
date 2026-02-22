@@ -160,12 +160,38 @@ async function callRelay(prompt: string, _apiKey?: string): Promise<LLMResponse>
     },
     body: JSON.stringify({
       model: model,
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: prompt }],
+      stream: false
     })
   });
 
   if (!response.ok) throw new Error(`Relay API Error: ${ response.status } ${ response.statusText }`);
-  const data = await response.json();
+
+  const contentType = response.headers.get('content-type') || '';
+  const text = await response.text();
+
+  // 中转站可能强制返回 SSE 流式，需解析 data: {...} 行
+  if (contentType.includes('text/event-stream') || text.trimStart().startsWith('data:')) {
+    let content = '';
+    for (const line of text.split('\n')) {
+      const s = line.trim();
+      if (s.startsWith('data:')) {
+        const payload = s.slice(5).trim();
+        if (payload === '[DONE]') break;
+        try {
+          const chunk = JSON.parse(payload);
+          const choice = chunk.choices?.[0];
+          if (choice?.delta?.content != null) content += choice.delta.content;
+          if (choice?.message?.content != null) content += choice.message.content;
+        } catch {
+          // 忽略单行解析失败
+        }
+      }
+    }
+    return { text: content.trim(), model: `Relay (${ model })` };
+  }
+
+  const data = JSON.parse(text);
   return { text: data.choices?.[0]?.message?.content ?? '', model: `Relay (${ model })` };
 }
 
