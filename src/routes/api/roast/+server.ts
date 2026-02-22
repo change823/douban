@@ -175,13 +175,11 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
     }
     `;
   } else {
-    // Optimized Mode: Use minimal data and short archetypes
+    // Optimized Mode: 与夸夸版一致只传 title/rating/comment，减小 payload，避免超时导致 Failed to fetch
     const interestes_ = interests.map((item: any) => ({
-      t: item.title,
-      r: item.rating,
-      g: item.tags,
-      c: item.comment,
-      d: item.create_time?.slice(0, 10), // Date only
+      title: item.title,
+      rating: item.rating,
+      comment: item.comment,
     }));
 
     prompt = `
@@ -204,7 +202,7 @@ export const POST = withRateLimit(async ({ request }: { request: Request }) => {
     2. Roast: Brutal, specific, funny. Must be 500+ chars. 
     3. Scores Analysis: 6-axis: pretentiousness, mainstream, nostalgia, darkness, geekiness, hardcore.
     4. Tags: 3-5 punchy tags.
-    5. Item Analysis: Pick 30 interesting items. Comment (thought) must be spicy/insightful (20-40 chars text).
+    5. Item Analysis: Pick 20 interesting items. Comment (thought) must be spicy/insightful (20-40 chars text).
 
     Output JSON:
     {
