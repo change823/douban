@@ -55,12 +55,7 @@ export class Roaster {
       return;
     }
 
-    const hasApiKey = apiKeys.google || apiKeys.deepseek || apiKeys.qwen || apiKeys.chatgpt;
-    if (!hasApiKey) {
-      this.errorMsg = '请先在下方设置您的 API Key';
-      return;
-    }
-
+    // 服务端可配置中转站默认 Key，无 Key 时也允许发起请求
     this.reset();
 
     try {

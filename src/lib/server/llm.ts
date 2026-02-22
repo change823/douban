@@ -143,11 +143,41 @@ async function callOpenAI(prompt: string, apiKey?: string): Promise<LLMResponse>
   return { text: data.choices[0].message.content, model: `OpenAI (${ model })` };
 }
 
+/** 中转站：OpenAI 兼容接口，使用自定义 URL + 模型 + Key，可作为默认无需用户填 Key */
+async function callRelay(prompt: string, _apiKey?: string): Promise<LLMResponse> {
+  const baseUrl = (env.RELAY_BASE_URL || '').replace(/\/+$/, '');
+  const model = env.RELAY_MODEL || 'gpt-4o';
+  const key = env.RELAY_API_KEY;
+  if (!baseUrl || !key) throw new Error("Missing RELAY_BASE_URL or RELAY_API_KEY");
+
+  const url = /\/v1\/?$/.test(baseUrl) ? `${baseUrl}/chat/completions` : `${baseUrl}/v1/chat/completions`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ key }`
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error(`Relay API Error: ${ response.status } ${ response.statusText }`);
+  const data = await response.json();
+  return { text: data.choices?.[0]?.message?.content ?? '', model: `Relay (${ model })` };
+}
+
 // --- Main Router ---
 
 export async function generateRoast(prompt: string, apiKeys?: ApiKeys): Promise<LLMResponse> {
   const providers: Array<{ name: string, fn: (p: string, k?: string) => Promise<LLMResponse>, key?: string }> = [];
 
+  // 中转站优先：配置了 RELAY_* 时作为默认，用户无需填 Key
+  if (env.RELAY_BASE_URL && env.RELAY_API_KEY) {
+    providers.push({ name: 'Relay', fn: callRelay });
+  }
   // Add providers if they have a key either in env or provided by user
   if (env.GOOGLE_API_KEY || apiKeys?.google) providers.push({ name: 'Gemini', fn: callGemini, key: apiKeys?.google });
   if (env.DEEPSEEK_API_KEY || apiKeys?.deepseek) providers.push({ name: 'DeepSeek', fn: callDeepSeek, key: apiKeys?.deepseek });
