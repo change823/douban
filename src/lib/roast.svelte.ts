@@ -55,6 +55,12 @@ export class Roaster {
       return;
     }
 
+    const hasApiKey = apiKeys.google || apiKeys.deepseek || apiKeys.qwen || apiKeys.chatgpt;
+    if (!hasApiKey) {
+      this.errorMsg = '请先在下方设置您的 API Key';
+      return;
+    }
+
     this.reset();
 
     try {
