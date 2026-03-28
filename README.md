@@ -9,7 +9,7 @@ Roast your style based on interests of a Douban user.
 
 ---
 
-## 部署到 Cloudflare Pages
+## 部署到 Cloudflare Pages -- 
 
 1. 在仓库根目录执行：`npm install`（已使用 `@sveltejs/adapter-cloudflare`）
 2. 在 Cloudflare Pages 绑定该 Git 仓库，构建配置：
